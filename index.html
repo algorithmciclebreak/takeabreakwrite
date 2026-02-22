@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Pausa</title>
+
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #0f0f0f;
+      color: #f5f5f5;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .container {
+      max-width: 650px;
+      width: 90%;
+      padding: 40px;
+      border-radius: 14px;
+      background: #1a1a1a;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      font-weight: 500;
+      margin-bottom: 24px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 120px;
+      background: #111;
+      color: #f5f5f5;
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 1rem;
+      resize: none;
+      margin-bottom: 20px;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: #888;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    button {
+      background: #f5f5f5;
+      color: #0f0f0f;
+      border: none;
+      padding: 10px 22px;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    button.secondary {
+      background: transparent;
+      color: #f5f5f5;
+      border: 1px solid #444;
+    }
+
+    button.danger {
+      background: #2a2a2a;
+      color: #aaa;
+      border: 1px solid #444;
+    }
+
+    .sent {
+      margin-top: 14px;
+      font-size: 0.85rem;
+      opacity: 0.6;
+    }
+
+    .history {
+      margin-top: 30px;
+      text-align: left;
+      display: none;
+      max-height: 250px;
+      overflow-y: auto;
+      border-top: 1px solid #333;
+      padding-top: 20px;
+    }
+
+    .entry {
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px dashed #333;
+    }
+
+    .date {
+      font-size: 0.75rem;
+      opacity: 0.5;
+      margin-bottom: 6px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>"Redes sociais são um recorte artificial feitas e desenhadas para o conflito.”</h1>
+
+    <textarea id="mensagem"  placeholder="Escreve. Não precisa resolver nada agora."
+  onkeydown="handleKey(event)"s> </textarea>
+
+    <div class="buttons">
+      <button onclick="enviar()">Enviar</button>
+      <button class="secondary" onclick="toggleHistorico()">Ver histórico</button>
+      <button class="danger" onclick="limparHistorico()">Limpar tudo</button>
+    </div>
+
+    <div class="sent" id="confirmacao"></div>
+
+    <div class="history" id="historico"></div>
+  </div>
+
+  <script>
+    function handleKey(event) {
+  if (event.key === "Enter" && !event.shiftKey) {
+    event.preventDefault(); // impede quebra de linha
+    enviar(); // envia a mensagem
+  }
+}
+    function enviar() {
+      const textarea = document.getElementById("mensagem");
+      const confirmacao = document.getElementById("confirmacao");
+
+      const texto = textarea.value.trim();
+      if (!texto) return;
+
+      const mensagens = JSON.parse(localStorage.getItem("universo")) || [];
+
+      mensagens.push({
+        texto: texto,
+        data: new Date().toLocaleString()
+      });
+
+      localStorage.setItem("universo", JSON.stringify(mensagens));
+
+      textarea.value = "";
+      confirmacao.textContent = "Enviado. Isso não precisa de resposta agora.";
+
+      setTimeout(() => {
+        confirmacao.textContent = "";
+      }, 3000);
+
+      renderHistorico();
+    }
+
+    function toggleHistorico() {
+      const historico = document.getElementById("historico");
+      historico.style.display =
+        historico.style.display === "none" || historico.style.display === ""
+          ? "block"
+          : "none";
+
+      renderHistorico();
+    }
+
+    function renderHistorico() {
+      const historico = document.getElementById("historico");
+      const mensagens = JSON.parse(localStorage.getItem("universo")) || [];
+
+      if (mensagens.length === 0) {
+        historico.innerHTML = "<p style='opacity:0.5'>Nada guardado ainda.</p>";
+        return;
+      }
+
+      historico.innerHTML = mensagens
+        .map(
+          (m) => `
+          <div class="entry">
+            <div class="date">${m.data}</div>
+            <div>${m.texto}</div>
+          </div>
+        `
+        )
+        .join("");
+    }
+
+    function limparHistorico() {
+      if (confirm("Tem certeza que quer apagar tudo?")) {
+        localStorage.removeItem("universo");
+        renderHistorico();
+      }
+    }
+  </script>
+</body>
+</html>
