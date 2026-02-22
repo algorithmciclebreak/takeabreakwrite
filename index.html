@@ -2,25 +2,28 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Pausa</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Break</title>
 
   <style>
     body {
       margin: 0;
-      min-height: 100vh;
+      min-height: 100svh;
       display: flex;
       justify-content: center;
       align-items: center;
       background: #0f0f0f;
       color: #f5f5f5;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right)
+               env(safe-area-inset-bottom) env(safe-area-inset-left);
     }
 
     .container {
       position: relative;
       max-width: 650px;
-      width: 90%;
-      padding: 40px;
+      width: 100%;
+      padding: 32px 28px 40px;
       border-radius: 14px;
       background: #1a1a1a;
       box-shadow: 0 10px 40px rgba(0,0,0,0.4);
@@ -28,9 +31,9 @@
     }
 
     h1 {
-      font-size: 1.4rem;
+      font-size: 1.2rem;
       font-weight: 500;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
 
     textarea {
@@ -40,10 +43,10 @@
       color: #f5f5f5;
       border: 1px solid #333;
       border-radius: 10px;
-      padding: 12px;
+      padding: 14px;
       font-size: 1rem;
       resize: none;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
 
     textarea:focus {
@@ -62,10 +65,11 @@
       background: #f5f5f5;
       color: #0f0f0f;
       border: none;
-      padding: 10px 22px;
+      padding: 12px 24px;
       border-radius: 999px;
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       cursor: pointer;
+      touch-action: manipulation;
     }
 
     button.secondary {
@@ -87,13 +91,13 @@
     }
 
     .history {
-      margin-top: 30px;
+      margin-top: 28px;
       text-align: left;
       display: none;
-      max-height: 250px;
+      max-height: 240px;
       overflow-y: auto;
       border-top: 1px solid #333;
-      padding-top: 20px;
+      padding-top: 18px;
     }
 
     .entry {
@@ -108,17 +112,19 @@
       margin-bottom: 6px;
     }
 
-    /* botão exportar discreto */
+    /* export discreto e mobile-safe */
     .export-btn {
       position: absolute;
-      top: 16px;
-      right: 18px;
+      top: 14px;
+      right: 16px;
       background: transparent;
       color: #888;
       border: none;
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       cursor: pointer;
       opacity: 0.6;
+      padding: 6px;
+      touch-action: manipulation;
     }
 
     .export-btn:hover {
@@ -134,7 +140,8 @@
 
     <h1>"Redes sociais são um recorte artificial feitas e desenhadas para o conflito.”</h1>
 
-    <textarea id="mensagem"
+    <textarea
+      id="mensagem"
       placeholder="Escreve. Não precisa resolver nada agora."
       onkeydown="handleKey(event)"></textarea>
 
@@ -145,7 +152,6 @@
     </div>
 
     <div class="sent" id="confirmacao"></div>
-
     <div class="history" id="historico"></div>
   </div>
 
@@ -173,28 +179,18 @@
 
       localStorage.setItem("universo", JSON.stringify(mensagens));
 
-      // vibração curtinha
-      if (navigator.vibrate) {
-        navigator.vibrate(30);
-      }
+      if (navigator.vibrate) navigator.vibrate(30);
 
       textarea.value = "";
       confirmacao.textContent = "Enviado. Isso não precisa de resposta agora.";
 
-      setTimeout(() => {
-        confirmacao.textContent = "";
-      }, 3000);
-
+      setTimeout(() => confirmacao.textContent = "", 3000);
       renderHistorico();
     }
 
     function toggleHistorico() {
-      const historico = document.getElementById("historico");
-      historico.style.display =
-        historico.style.display === "none" || historico.style.display === ""
-          ? "block"
-          : "none";
-
+      const h = document.getElementById("historico");
+      h.style.display = h.style.display === "block" ? "none" : "block";
       renderHistorico();
     }
 
@@ -202,21 +198,17 @@
       const historico = document.getElementById("historico");
       const mensagens = JSON.parse(localStorage.getItem("universo")) || [];
 
-      if (mensagens.length === 0) {
+      if (!mensagens.length) {
         historico.innerHTML = "<p style='opacity:0.5'>Nada guardado ainda.</p>";
         return;
       }
 
-      historico.innerHTML = mensagens
-        .map(
-          (m) => `
-          <div class="entry">
-            <div class="date">${m.data}</div>
-            <div>${m.texto}</div>
-          </div>
-        `
-        )
-        .join("");
+      historico.innerHTML = mensagens.map(m => `
+        <div class="entry">
+          <div class="date">${m.data}</div>
+          <div>${m.texto}</div>
+        </div>
+      `).join("");
     }
 
     function limparHistorico() {
@@ -228,27 +220,18 @@
 
     function exportarTXT() {
       const mensagens = JSON.parse(localStorage.getItem("universo")) || [];
-
-      if (mensagens.length === 0) {
-        alert("Nada para exportar.");
-        return;
-      }
+      if (!mensagens.length) return alert("Nada para exportar.");
 
       const conteudo = mensagens
-        .map(m => `[${m.data}]\n${m.texto}\n`)
-        .join("\n-------------------------\n\n");
+        .map(m => `[${m.data}]\n${m.texto}`)
+        .join("\n\n----------------\n\n");
 
       const blob = new Blob([conteudo], { type: "text/plain;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-
       const a = document.createElement("a");
-      a.href = url;
+      a.href = URL.createObjectURL(blob);
       a.download = "pausa.txt";
-      document.body.appendChild(a);
       a.click();
-
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      URL.revokeObjectURL(a.href);
     }
   </script>
 </body>
