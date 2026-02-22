@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <title>Pausa</title>
 
+  <!-- Mobile first -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <style>
     body {
       margin: 0;
@@ -40,7 +43,7 @@
       border: 1px solid #333;
       border-radius: 10px;
       padding: 12px;
-      font-size: 1rem;
+      font-size: 16px; /* evita zoom no iOS */
       resize: none;
       margin-bottom: 20px;
     }
@@ -61,9 +64,9 @@
       background: #f5f5f5;
       color: #0f0f0f;
       border: none;
-      padding: 10px 22px;
+      padding: 14px 24px;
       border-radius: 999px;
-      font-size: 0.9rem;
+      font-size: 16px;
       cursor: pointer;
     }
 
@@ -106,15 +109,47 @@
       opacity: 0.5;
       margin-bottom: 6px;
     }
+
+    /* ===== Mobile adjustments ===== */
+    @media (max-width: 480px) {
+      body {
+        align-items: flex-start;
+      }
+
+      .container {
+        margin-top: 40px;
+        padding: 24px;
+      }
+
+      h1 {
+        font-size: 1.2rem;
+        line-height: 1.4;
+      }
+
+      textarea {
+        height: 140px;
+      }
+
+      .buttons {
+        flex-direction: column;
+      }
+
+      button {
+        width: 100%;
+      }
+    }
   </style>
 </head>
 
 <body>
   <div class="container">
-    <h1>"Redes sociais são um recorte artificial feitas e desenhadas para o conflito.”</h1>
+    <h1>"Redes sociais são um recorte artificial feitas e desenhadas para o conflito."</h1>
 
-    <textarea id="mensagem"  placeholder="Escreve. Não precisa resolver nada agora."
-  onkeydown="handleKey(event)"s> </textarea>
+    <textarea
+      id="mensagem"
+      placeholder="Escreve. Não precisa resolver nada agora."
+      onkeydown="handleKey(event)">
+    </textarea>
 
     <div class="buttons">
       <button onclick="enviar()">Enviar</button>
@@ -129,11 +164,12 @@
 
   <script>
     function handleKey(event) {
-  if (event.key === "Enter" && !event.shiftKey) {
-    event.preventDefault(); // impede quebra de linha
-    enviar(); // envia a mensagem
-  }
-}
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        enviar();
+      }
+    }
+
     function enviar() {
       const textarea = document.getElementById("mensagem");
       const confirmacao = document.getElementById("confirmacao");
@@ -149,6 +185,10 @@
       });
 
       localStorage.setItem("universo", JSON.stringify(mensagens));
+
+      if (navigator.vibrate) {
+        navigator.vibrate(40);
+      }
 
       textarea.value = "";
       confirmacao.textContent = "Enviado. Isso não precisa de resposta agora.";
