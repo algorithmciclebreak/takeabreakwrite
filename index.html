@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Break</title>
+  <title>Pausa</title>
 
   <style>
     body {
@@ -47,6 +47,7 @@
       font-size: 1rem;
       resize: none;
       margin-bottom: 18px;
+      box-sizing: border-box; /* 🔑 correção do alinhamento */
     }
 
     textarea:focus {
@@ -112,7 +113,6 @@
       margin-bottom: 6px;
     }
 
-    /* export discreto e mobile-safe */
     .export-btn {
       position: absolute;
       top: 14px;
@@ -178,13 +178,12 @@
       });
 
       localStorage.setItem("universo", JSON.stringify(mensagens));
-
       if (navigator.vibrate) navigator.vibrate(30);
 
       textarea.value = "";
       confirmacao.textContent = "Enviado. Isso não precisa de resposta agora.";
-
       setTimeout(() => confirmacao.textContent = "", 3000);
+
       renderHistorico();
     }
 
